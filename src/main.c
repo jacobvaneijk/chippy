@@ -69,5 +69,7 @@ int main(int argc, char **argv) {
 
     chip8 *chippy = chip8_new(argv[optind]);
 
-    return chip8_run(chippy);
+    while (chip8_cycle(chippy) != EXIT_FAILURE) {}
+
+    return EXIT_FAILURE;
 }

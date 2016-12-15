@@ -10,8 +10,10 @@
 #include "chip8.h"
 
 #include <errno.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 chip8* chip8_new(const char *rom) {
     chip8 *chippy = malloc(sizeof(chippy));
@@ -24,23 +26,32 @@ chip8* chip8_new(const char *rom) {
         exit(EIO);
     }
 
-    chippy->rom = ptr;
+    // Load the file into memory.
+    fread(chippy->ram + PROGRAM_START, 1, RAM_SIZE - PROGRAM_START, ptr);
+
+    fclose(ptr);
+
+    // Load the fontset into memory.
+    memcpy(chippy->ram, fontset, sizeof(fontset));
+
+    // Set the program counter to the beginning of the program.
+    chippy->pc = PROGRAM_START;
 
     return chippy;
 }
 
 static void chip8_free(chip8 *chippy) {
-    if (chippy->rom != NULL) {
-        fclose(chippy->rom);
-    }
-
     free(chippy);
 }
 
-int chip8_run(chip8 *chippy) {
-    printf("Starting chippy...\n");
+int chip8_cycle(chip8 *chippy) {
+    uint16_t opcode  = chippy->ram[chippy->pc] << 8 | chippy->ram[chippy->pc + 1];
 
-    free(chippy);
+    switch (opcode & 0xF000) {
+        default:
+            printf("Invalid opcode 0x%X at address 0x%X.\n", opcode, chippy->pc);
+            return EXIT_FAILURE;
+    }
 
     return EXIT_SUCCESS;
 }
