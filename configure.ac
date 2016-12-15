@@ -7,7 +7,7 @@ AC_INIT(
 
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 
-AC_PREREQ([2.69])
+AC_PREREQ([2.68])
 
 AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_HEADERS([config.h])
