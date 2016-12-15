@@ -1,0 +1,8 @@
+language: c
+
+branches:
+  only:
+    - master
+
+script:
+  - ./autogen.sh && ./configure && make

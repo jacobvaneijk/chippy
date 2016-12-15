@@ -1,0 +1,21 @@
+# --- C ---
+
+*.o
+
+# --- Autotools ---
+
+autom4te.cache
+.deps
+.dirstamp
+aclocal.m4
+compile
+config.*
+configure
+depcomp
+install-sh
+Makefile
+Makefile.in
+missing
+stamp-h1
+
+chippy
