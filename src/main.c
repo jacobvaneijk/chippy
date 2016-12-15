@@ -15,6 +15,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "chip8.h"
+
 static struct option long_options[] = {
     { "help",    no_argument, 0, 'h' },
     { "version", no_argument, 0, 'v' },
@@ -65,5 +67,7 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
 
-    return EXIT_SUCCESS;
+    chip8 *chippy = chip8_new(argv[optind]);
+
+    return chip8_run(chippy);
 }
