@@ -54,6 +54,7 @@ typedef struct {
 } chip8;
 
 chip8* chip8_new(const char *rom);
+void chip8_free(chip8 *chippy);
 int chip8_cycle(chip8 *chippy);
 
 #endif

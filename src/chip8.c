@@ -40,7 +40,7 @@ chip8* chip8_new(const char *rom) {
     return chippy;
 }
 
-static void chip8_free(chip8 *chippy) {
+void chip8_free(chip8 *chippy) {
     free(chippy);
 }
 

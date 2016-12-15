@@ -71,5 +71,7 @@ int main(int argc, char **argv) {
 
     while (chip8_cycle(chippy) != EXIT_FAILURE) {}
 
+    chip8_free(chippy);
+
     return EXIT_FAILURE;
 }
