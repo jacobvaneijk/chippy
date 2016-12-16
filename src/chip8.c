@@ -48,6 +48,23 @@ int chip8_cycle(chip8 *chippy) {
     uint16_t opcode  = chippy->ram[chippy->pc] << 8 | chippy->ram[chippy->pc + 1];
 
     switch (opcode & 0xF000) {
+        case 0x0000:
+            switch (opcode & 0x000F) {
+                case 0x0000: // 00E0: Clears the screen.
+                    memset(chippy->gfx, 0, sizeof(chippy->gfx);
+                    chippy->pc += 2;
+                    break;
+
+                case 0x000E: // 00EE: Returns from a subroutine.
+                    chippy->pc = chippy->stack[--chippy->sp] + 2;
+                    break;
+
+                default:
+                    printf("Invalid opcode 0x%X at address 0x%X.\n", opcode, chippy->pc);
+                    return EXIT_FAILURE;
+            }
+            break;
+
         default:
             printf("Invalid opcode 0x%X at address 0x%X.\n", opcode, chippy->pc);
             return EXIT_FAILURE;
