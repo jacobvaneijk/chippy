@@ -51,7 +51,7 @@ int chip8_cycle(chip8 *chippy) {
         case 0x0000:
             switch (opcode & 0x000F) {
                 case 0x0000: // 00E0: Clears the screen.
-                    memset(chippy->gfx, 0, sizeof(chippy->gfx);
+                    memset(chippy->gfx, 0, sizeof(chippy->gfx));
                     chippy->pc += 2;
                     break;
 
