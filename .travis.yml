@@ -4,5 +4,8 @@ branches:
   only:
     - master
 
+notifications:
+  email: false
+
 script:
   - ./autogen.sh && ./configure && make
