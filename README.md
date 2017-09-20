@@ -2,7 +2,7 @@
 
 > A (Super) CHIP-8 virtual machine.
 
-[![Build Status](https://img.shields.io/travis/jacobvaneijk/chippy.svg)](https://travis-ci.org/jacobvaneijk/chippy) [![License](https://img.shields.io/github/license/jacobvaneijk/chippy.svg)](LICENSE)
+[![License](https://img.shields.io/github/license/jacobvaneijk/chippy.svg)](LICENSE)
 
 CHIP-8 is an interesting little programming language. Programs written in it are run on a CHIP-8 virtual machine. This repository contains the source code for my CHIP-8 virtual machine, which I made to get started with emulation.
 
@@ -10,8 +10,7 @@ CHIP-8 is an interesting little programming language. Programs written in it are
 
 1. Make sure you have installed the following dependencies:
 
-    - autoconf
-    - automake
+    - meson
     - git
 
 2. Clone the source with `git` and `cd` into the cloned repository:
@@ -23,7 +22,7 @@ CHIP-8 is an interesting little programming language. Programs written in it are
 3. Build:
 
     ```sh
-    $ ./autogen.sh && ./configure && make
+    $ meson build
     ```
 
 ## License

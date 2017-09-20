@@ -7,15 +7,11 @@
  * that was distributed with this source code.
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "chip8.h"
+#include "libchippy/chippy.h"
 
 static struct option long_options[] = {
     { "help",    no_argument, 0, 'h' },
@@ -34,8 +30,7 @@ static void display_help(const char *program) {
 }
 
 static void display_version(void) {
-    printf("%s (%s) %s\nCopyright (c) 2016, Jacob van Eijk\n",
-        PACKAGE,
+    printf("%s %s\nCopyright (c) 2017, Jacob van Eijk\n",
         PACKAGE_NAME,
         PACKAGE_VERSION);
 }
@@ -63,15 +58,16 @@ int main(int argc, char **argv) {
 
     if (optind >= argc) {
         display_help(argv[0]);
-
         return EXIT_FAILURE;
     }
 
-    chip8 *chippy = chip8_new(argv[optind]);
+    struct chippy *machine = malloc(sizeof(struct chippy));
 
-    while (chip8_cycle(chippy) != EXIT_FAILURE) {}
+    chippy_init(machine);
 
-    chip8_free(chippy);
+    while (chippy_step(machine) != EXIT_FAILURE) {}
+
+    chippy_destroy(machine);
 
     return EXIT_FAILURE;
 }
