@@ -33,3 +33,4 @@ inc_dir = include_directories('src')
 
 subdir('src/libchippy')
 subdir('src/chippy')
+subdir('tests')

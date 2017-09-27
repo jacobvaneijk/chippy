@@ -83,24 +83,34 @@ struct chippy {
  * Initializes a machine data structure. This function can
  * also be called to reinitialize the machine.
  *
- * @param machine The machine data structure to be initialized.
+ * @param machine The machine to be initialized.
  */
-void chippy_init(struct chippy* machine);
+void chippy_init(struct chippy *machine);
+
+/**
+ * Reads a ROM file and loads it into the memory of the machine.
+ *
+ * @param machine The machine to load the ROM into.
+ * @param rom     The filepath to the ROM to load.
+ *
+ * @return Returns 0 on success, otherwise 1.
+ */
+int chippy_load_rom(struct chippy *machine, const char *rom);
 
 /**
  * Performs exactly one instruction cycle.
  *
- * @param machine The machine data structure to step.
+ * @param machine The machine to step.
  *
  * @return Returns 0 on success, otherwise 1.
  */
-int chippy_step(struct chippy* machine);
+int chippy_step(struct chippy *machine);
 
 /**
  * Frees the memory allocated for the machine.
  *
- * @param machine The machine data structure to destroy.
+ * @param machine The machine to destroy.
  */
-void chippy_destroy(struct chippy* machine);
+void chippy_destroy(struct chippy *machine);
 
 #endif
