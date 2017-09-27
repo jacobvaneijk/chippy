@@ -12,6 +12,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include <stdio.h>
+
 static struct chippy *chippy_create(void) {
     struct chippy *machine = malloc(sizeof(struct chippy));
 
@@ -30,13 +32,31 @@ START_TEST(test_cls)
     struct chippy *machine = chippy_create();
 
     memset(machine->gfx, 1, SCREEN_W * SCREEN_H);
-    chippy_insert_opcode(machine, 0x00E0, 0x200);
 
+    chippy_insert_opcode(machine, 0x00E0, 0x200);
     chippy_step(machine);
 
     for (int i = 0; i < (SCREEN_W * SCREEN_H); i++) {
         ck_assert_int_eq(machine->gfx[i], 0);
     }
+}
+END_TEST
+
+START_TEST(test_ret)
+{
+    struct chippy *machine = chippy_create();
+
+    machine->stack[machine->sp++] = 0x210;
+    machine->stack[machine->sp++] = 0x220;
+    machine->stack[machine->sp++] = 0x230;
+
+    ck_assert_int_eq(machine->sp, 3);
+
+    chippy_insert_opcode(machine, 0x00EE, 0x200);
+    chippy_step(machine);
+
+    ck_assert_int_eq(machine->pc, 0x230);
+    ck_assert_int_eq(machine->sp, 2);
 }
 END_TEST
 
@@ -47,6 +67,7 @@ Suite *create_opcodes_suite(void) {
     suite_add_tcase(suite, chain);
 
     tcase_add_test(chain, test_cls);
+    tcase_add_test(chain, test_ret);
 
     return suite;
 }

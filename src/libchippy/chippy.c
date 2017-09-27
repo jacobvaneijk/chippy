@@ -22,6 +22,7 @@
 
 void chippy_init(struct chippy *machine) {
     memcpy(machine->ram, fontset, sizeof(fontset));
+    memset(machine->stack, 0, sizeof(machine->stack));
     machine->pc = PROGRAM_START;
 }
 
@@ -47,9 +48,13 @@ int chippy_step(struct chippy *machine) {
     switch (opcode & 0xF000) {
         case 0x0000:
             switch (opcode & 0x00FF) {
-                case 0x00E0: // 00E0: Clears the screen.
+                case 0x00E0: // CLS: Clears the screen.
                     memset(machine->gfx, 0, sizeof(machine->gfx));
                     machine->pc += 2;
+                    break;
+
+                case 0x00EE: // RET: Return from a subroutine.
+                    machine->pc = machine->stack[--machine->sp];
                     break;
 
                 default:
