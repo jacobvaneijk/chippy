@@ -59,10 +59,6 @@ int chippy_step(struct chippy *machine) {
                 case 0x00EE: // RET: Return from a subroutine.
                     machine->pc = machine->stack[--machine->sp];
                     break;
-
-                default:
-                    printf("Invalid opcode 0x%X at address 0x%X.\n", opcode, machine->pc);
-                    return EXIT_FAILURE;
             }
             break;
 
@@ -101,8 +97,49 @@ int chippy_step(struct chippy *machine) {
             machine->V[X(opcode)] += KK(opcode);
             break;
 
+        case 0x8000:
+            switch (opcode & 0x000F) {
+                case 0x0001: // LD: Set VX = VY.
+                    machine->V[X(opcode)] = machine->V[Y(opcode)];
+                    break;
+
+                case 0x0002: // OR: Set VX = VX | VY.
+                    machine->V[X(opcode)] |= machine->V[Y(opcode)];
+                    break;
+
+                case 0x0003: // XOR: Set VX = VX ^ VY.
+                    machine->V[X(opcode)] ^= machine->V[Y(opcode)];
+                    break;
+
+                case 0x0004: // ADD: Set VX = VX + VY, set VF = carry.
+                    machine->V[0xF] = (machine->V[X(opcode)] + machine->V[Y(opcode)]) > 255;
+                    machine->V[X(opcode)] += machine->V[Y(opcode)];
+                    break;
+
+                case 0x0005: // SUB: Set VX = VX - VY, set VF = NOT borrow.
+                    machine->V[0xF] = machine->V[X(opcode)] > machine->V[Y(opcode)];
+                    machine->V[X(opcode)] -= machine->V[Y(opcode)];
+                    break;
+
+                case 0x0006: // SHR: Set VX = VX >> 1, set VF = LSB.
+                    machine->V[0xF] = machine->V[X(opcode)] & 1;
+                    machine->V[X(opcode)] >>= 1;
+                    break;
+
+                case 0x0007: // SUBN: Set VX = VY - VX, set VF = NOT borrow.
+                    machine->V[0xF] = machine->V[Y(opcode)] > machine->V[X(opcode)];
+                    machine->V[X(opcode)] = machine->V[Y(opcode)] - machine->V[X(opcode)];
+                    break;
+
+                case 0x000E: // SHL: Set VX = VX << 1, set VF = MSB.
+                    machine->V[0xF] = (machine->V[X(opcode)] & 0x80) != 0;
+                    machine->V[X(opcode)] <<= 1;
+                    break;
+            }
+            break;
+
         default:
-            printf("Invalid opcode 0x%X at address 0x%X.\n", opcode, machine->pc);
+            printf("Invalid opcode 0x%X at address 0x%X.\n", opcode, machine->pc - 2);
             return EXIT_FAILURE;
     }
 

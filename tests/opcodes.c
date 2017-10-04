@@ -127,7 +127,7 @@ START_TEST(test_se_xy)
 }
 END_TEST
 
-START_TEST(test_ld_xy)
+START_TEST(test_ld_kk)
 {
     struct chippy *machine = chippy_create();
 
@@ -149,6 +149,163 @@ START_TEST(test_add_xkk)
 }
 END_TEST
 
+START_TEST(test_ld_xy)
+{
+    struct chippy *machine = chippy_create();
+
+    machine->V[2] = 3;
+
+    chippy_insert_opcode(machine, 0x8121, 0x200);
+    chippy_step(machine);
+
+    ck_assert_int_eq(machine->V[1], 3);
+}
+END_TEST
+
+START_TEST(test_or)
+{
+    struct chippy *machine = chippy_create();
+
+    machine->V[1] = 5;
+    machine->V[2] = 3;
+
+    chippy_insert_opcode(machine, 0x8122, 0x200);
+    chippy_step(machine);
+
+    ck_assert_int_eq(machine->V[1], 7);
+}
+END_TEST
+
+START_TEST(test_xor)
+{
+    struct chippy *machine = chippy_create();
+
+    machine->V[1] = 5;
+    machine->V[2] = 3;
+
+    chippy_insert_opcode(machine, 0x8123, 0x200);
+    chippy_step(machine);
+
+    ck_assert_int_eq(machine->V[1], 6);
+}
+END_TEST
+
+START_TEST(test_add_xy)
+{
+    struct chippy *machine = chippy_create();
+
+    machine->V[1] = 5;
+    machine->V[2] = 3;
+
+    chippy_insert_opcode(machine, 0x8124, 0x200);
+    chippy_step(machine);
+
+    ck_assert_int_eq(machine->V[1], 8);
+    ck_assert_int_eq(machine->V[0xF], 0);
+
+    machine->V[1] = 200;
+    machine->V[2] = 200;
+
+    chippy_insert_opcode(machine, 0x8124, 0x202);
+    chippy_step(machine);
+
+    ck_assert_int_eq(machine->V[1], 144);
+    ck_assert_int_eq(machine->V[0xF], 1);
+}
+END_TEST
+
+START_TEST(test_sub_xy)
+{
+    struct chippy *machine = chippy_create();
+
+    machine->V[1] = 5;
+    machine->V[2] = 3;
+
+    chippy_insert_opcode(machine, 0x8125, 0x200);
+    chippy_step(machine);
+
+    ck_assert_int_eq(machine->V[1], 2);
+    ck_assert_int_eq(machine->V[0xF], 1);
+
+    machine->V[1] = 3;
+    machine->V[2] = 5;
+
+    chippy_insert_opcode(machine, 0x8125, 0x202);
+    chippy_step(machine);
+
+    ck_assert_int_eq(machine->V[1], 254);
+    ck_assert_int_eq(machine->V[0xF], 0);
+}
+END_TEST
+
+START_TEST(test_shr)
+{
+    struct chippy *machine = chippy_create();
+
+    machine->V[1] = 23;
+
+    chippy_insert_opcode(machine, 0x8106, 0x200);
+    chippy_step(machine);
+
+    ck_assert_int_eq(machine->V[1], 11);
+    ck_assert_int_eq(machine->V[0xF], 1);
+
+    machine->V[1] = 22;
+
+    chippy_insert_opcode(machine, 0x8106, 0x202);
+    chippy_step(machine);
+
+    ck_assert_int_eq(machine->V[1], 11);
+    ck_assert_int_eq(machine->V[0xF], 0);
+}
+END_TEST
+
+START_TEST(test_subn)
+{
+    struct chippy *machine = chippy_create();
+
+    machine->V[1] = 3;
+    machine->V[2] = 5;
+
+    chippy_insert_opcode(machine, 0x8127, 0x200);
+    chippy_step(machine);
+
+    ck_assert_int_eq(machine->V[1], 2);
+    ck_assert_int_eq(machine->V[0xF], 1);
+
+    machine->V[1] = 5;
+    machine->V[2] = 3;
+
+    chippy_insert_opcode(machine, 0x8127, 0x202);
+    chippy_step(machine);
+
+    ck_assert_int_eq(machine->V[1], 254);
+    ck_assert_int_eq(machine->V[0xF], 0);
+}
+END_TEST
+
+START_TEST(test_shl)
+{
+    struct chippy *machine = chippy_create();
+
+    machine->V[1] = 23;
+
+    chippy_insert_opcode(machine, 0x810E, 0x200);
+    chippy_step(machine);
+
+    ck_assert_int_eq(machine->V[1], 46);
+    ck_assert_int_eq(machine->V[0xF], 0);
+
+    machine->V[1] = 151;
+
+    chippy_insert_opcode(machine, 0x810E, 0x202);
+    chippy_step(machine);
+
+    ck_assert_int_eq(machine->V[1], 46);
+    ck_assert_int_eq(machine->V[0xF], 1);
+}
+
+END_TEST
 Suite *create_opcodes_suite(void) {
     Suite *suite = suite_create("Opcodes");
     TCase *chain = tcase_create("opcode tests");
@@ -162,8 +319,16 @@ Suite *create_opcodes_suite(void) {
     tcase_add_test(chain, test_se_xkk);
     tcase_add_test(chain, test_sne_xkk);
     tcase_add_test(chain, test_se_xy);
-    tcase_add_test(chain, test_ld_xy);
+    tcase_add_test(chain, test_ld_kk);
     tcase_add_test(chain, test_add_xkk);
+    tcase_add_test(chain, test_ld_xy);
+    tcase_add_test(chain, test_or);
+    tcase_add_test(chain, test_xor);
+    tcase_add_test(chain, test_add_xy);
+    tcase_add_test(chain, test_sub_xy);
+    tcase_add_test(chain, test_shr);
+    tcase_add_test(chain, test_subn);
+    tcase_add_test(chain, test_shl);
 
     return suite;
 }
