@@ -11,6 +11,7 @@ add_project_arguments(
     '-Werror',
     '-std=c99',
     '-Wno-unused-variable',
+    '-Wno-maybe-uninitialized',
     language: 'c'
 )
 

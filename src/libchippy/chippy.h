@@ -58,6 +58,8 @@ static uint8_t fontset[80] = {
     0xF0, 0x80, 0xF0, 0x80, 0x80  // F
 };
 
+typedef int (*keyboard_poller)(int);
+
 /**
  * This is the main data structure for holding information and state about the
  * machine.
@@ -66,8 +68,8 @@ struct chippy {
     uint8_t ram[RAM_SIZE];              // Memory (4kB)
     uint8_t V[16];                      // 16 general purpose 8-bit registers
 
-    uint8_t delay_timer;                // Delay timer
-    uint8_t sound_timer;                // Sound timer
+    uint8_t dt;                         // Delay timer
+    uint8_t st;                         // Sound timer
 
     uint16_t pc;                        // Program counter
     uint16_t I;                         // Index register
@@ -77,6 +79,10 @@ struct chippy {
 
     uint8_t gfx[SCREEN_W * SCREEN_H];   // Graphics buffer
     uint8_t key[16];                    // Keypad
+
+    int8_t wait_key;                    // Whether to wait until a key press
+
+    keyboard_poller keydown;            // Keyboard poller
 };
 
 /**

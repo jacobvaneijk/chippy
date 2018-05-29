@@ -10,12 +10,17 @@
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include "libchippy/chippy.h"
+#include "gfx.h"
+
+static int hidpi = 0;
 
 static struct option long_options[] = {
-    { "help",    no_argument, 0, 'h' },
-    { "version", no_argument, 0, 'v' },
+    { "help",    no_argument, 0,      'h' },
+    { "version", no_argument, 0,      'v' },
+    { "hidpi",   no_argument, &hidpi,  1  },
     { 0, 0, 0, 0 }
 };
 
@@ -25,6 +30,7 @@ static void display_help(const char *program) {
            "Options:\n"
            " -h, --help    Display this information.\n"
            " -v, --version Display version information.\n"
+           "     --hidpi   Scale for HiDPI screens.\n"
            "\n"
            "For bug reports, please see <%s>.\n", program, PACKAGE_BUGREPORT);
 }
@@ -61,13 +67,29 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
 
+    if (gfx_init(hidpi ? 2 : 1)) {
+        return EXIT_FAILURE;
+    }
+
+    srand(time(NULL));
+
     struct chippy *machine = malloc(sizeof(struct chippy));
 
     chippy_init(machine);
 
-    while (chippy_step(machine) != EXIT_FAILURE) {}
+    if (chippy_load_rom(machine, argv[optind]) != 0) {
+        return EXIT_FAILURE;
+    }
 
-    chippy_destroy(machine);
+    while (chippy_step(machine) != EXIT_FAILURE) {
+        if (gfx_close_requested() != 0) {
+            break;
+        }
+
+        gfx_render(machine, hidpi ? 2 : 1);
+    }
+
+    gfx_destroy();
 
     return EXIT_FAILURE;
 }

@@ -25,6 +25,7 @@ void chippy_init(struct chippy *machine) {
     memset(machine->stack, 0, sizeof(machine->stack));
     machine->pc = PROGRAM_START;
     machine->sp = 0;
+    machine->wait_key = -1;
 }
 
 int chippy_load_rom(struct chippy *machine, const char *rom) {
@@ -46,6 +47,10 @@ int chippy_step(struct chippy *machine) {
     uint16_t opcode = machine->ram[machine->pc] << 8
                     | machine->ram[machine->pc + 1];
 
+    if (machine->wait_key != -1) {
+        machine->wait_key = -1;
+    }
+
     machine->pc += 2;
 
     switch (opcode & 0xF000) {
@@ -53,7 +58,6 @@ int chippy_step(struct chippy *machine) {
             switch (opcode & 0x00FF) {
                 case 0x00E0: // CLS: Clears the screen.
                     memset(machine->gfx, 0, sizeof(machine->gfx));
-                    machine->pc += 2;
                     break;
 
                 case 0x00EE: // RET: Return from a subroutine.
@@ -134,6 +138,96 @@ int chippy_step(struct chippy *machine) {
                 case 0x000E: // SHL: Set VX = VX << 1, set VF = MSB.
                     machine->V[0xF] = (machine->V[X(opcode)] & 0x80) != 0;
                     machine->V[X(opcode)] <<= 1;
+                    break;
+            }
+            break;
+
+        case 0x9000: // SNE: Skip next instruction if VX != VY.
+            if (machine->V[X(opcode)] != machine->V[Y(opcode)]) {
+                machine->pc += 2;
+            }
+            break;
+
+        case 0xA000: // LD: Set I = NNN.
+            machine->I = NNN(opcode);
+            break;
+
+        case 0xB000: // JP: Jump to location NNN + V0.
+            machine->pc = NNN(opcode) + machine->V[0];
+            break;
+
+        case 0xC000: // RND: Set VX = random byte & KK.
+            machine->V[X(opcode)] = rand() & KK(opcode);
+            break;
+
+        case 0xD000: // DRW: Display N-byte sprite starting at address I at (VX, VY), set VF = collision.
+            for (int y = 0; y < N(opcode); y++) {
+                uint8_t sprite = machine->ram[machine->I + y];
+
+                for (int x = 0; x < 8; x++) {
+                    int pixel = (sprite & (1 << (7 - x))) != 0;
+                    int xpos = machine->V[X(opcode)] + x;
+                    int ypos = machine->V[Y(opcode)] + y;
+                    int pos = SCREEN_W * ypos + xpos;
+
+                    machine->V[0xF] |= machine->gfx[pos] & pixel;
+                    machine->gfx[pos] ^= pixel;
+                }
+            }
+            break;
+
+        case 0xE000:
+            switch (opcode & 0x000F) {
+                case 0x009E: // SKP: Skip next instruction if key with the value of VX is pressed.
+                    break;
+
+                case 0x00A1: // SKNP: Skip next instruction if key with the value of VX is not pressed.
+                    break;
+            }
+            break;
+
+        case 0xF000:
+            switch (opcode & 0x000F) {
+                case 0x0007: // LD: Set VX = delay timer value.
+                    machine->V[X(opcode)] = machine->dt;
+                    break;
+
+                case 0x000A: // LD: Wait for a key press, store the value of the key in VX.
+                    machine->wait_key = X(opcode);
+                    break;
+
+                case 0x0015: // LD: Set delay timer = VX.
+                    machine->dt = machine->V[X(opcode)];
+                    break;
+
+                case 0x0018: // LD: Set sound timer = VX.
+                    machine->st = machine->V[X(opcode)];
+                    break;
+
+                case 0x001E: // ADD: Set I = I + VX.
+                    machine->I += machine->V[X(opcode)];
+                    break;
+
+                case 0x0029: // LD: Set I = location of sprite for digit VX.
+                    machine->I = machine->V[X(opcode)] * 5;
+                    break;
+
+                case 0x0033: // LD: Store BCD representation of VX in memory locations I, I+1 and I+2.
+                    machine->ram[machine->I] = X(opcode) / 100;
+                    machine->ram[machine->I + 1] = (X(opcode) / 10) % 10;
+                    machine->ram[machine->I + 2] = X(opcode) % 10;
+                    break;
+
+                case 0x0055: // LD: Store registers V0 through VX in memory starting at address I.
+                    for (int i = 0; i <= X(opcode); i++) {
+                        machine->ram[machine->I + i] = machine->V[i];
+                    }
+                    break;
+
+                case 0x0065: // LD: Read registers V0 through VX from memory starting at address I.
+                    for (int i = 0; i <= X(opcode); i++) {
+                        machine->V[i] = machine->ram[machine->I + i];
+                    }
                     break;
             }
             break;

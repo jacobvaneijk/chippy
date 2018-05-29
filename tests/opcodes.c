@@ -304,8 +304,46 @@ START_TEST(test_shl)
     ck_assert_int_eq(machine->V[1], 46);
     ck_assert_int_eq(machine->V[0xF], 1);
 }
-
 END_TEST
+
+START_TEST(test_sne_xy)
+{
+    struct chippy *machine = chippy_create();
+
+    machine->V[2] = 0x11;
+    machine->V[3] = 0x12;
+
+    chippy_insert_opcode(machine, 0x9230, 0x200);
+    chippy_step(machine);
+
+    ck_assert_int_eq(machine->pc, 0x204);
+}
+END_TEST
+
+START_TEST(test_ld_i)
+{
+    struct chippy *machine = chippy_create();
+
+    chippy_insert_opcode(machine, 0xA123, 0x200);
+    chippy_step(machine);
+
+    ck_assert_int_eq(machine->I, 0x123);
+}
+END_TEST
+
+START_TEST(test_jp_nnn)
+{
+    struct chippy *machine = chippy_create();
+
+    machine->V[0] = 4;
+
+    chippy_insert_opcode(machine, 0xB123, 0x200);
+    chippy_step(machine);
+
+    ck_assert_int_eq(machine->pc, 0x127);
+}
+END_TEST
+
 Suite *create_opcodes_suite(void) {
     Suite *suite = suite_create("Opcodes");
     TCase *chain = tcase_create("opcode tests");
@@ -329,6 +367,9 @@ Suite *create_opcodes_suite(void) {
     tcase_add_test(chain, test_shr);
     tcase_add_test(chain, test_subn);
     tcase_add_test(chain, test_shl);
+    tcase_add_test(chain, test_sne_xy);
+    tcase_add_test(chain, test_ld_i);
+    tcase_add_test(chain, test_jp_nnn);
 
     return suite;
 }

@@ -1,5 +1,6 @@
 chippy_files = files(
-    'main.c'
+    'main.c',
+    'gfx.c'
 )
 
 sdl2 = dependency('sdl2')
